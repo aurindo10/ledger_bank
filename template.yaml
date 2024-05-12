@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cmd/create_bank/main
+      Runtime: go1.x
+      Events:
+        MyApi:
+          Type: Api
+          Properties:
+            Path: /create_bank_account
+            Method: post
+            Auth:
+              Authorizer: NONE
+  MySecondFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cmd/create_transaction/main
+      Runtime: go1.x
+      Events:
+        MyApi:
+          Type: Api
+          Properties:
+            Path: /update_account
+            Method: post
+            Auth:
+              Authorizer: NONE
