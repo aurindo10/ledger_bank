@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/sqs"
 )
 
 type AccountRepository struct {
@@ -69,7 +70,7 @@ func (c *AccountRepository) UpdateBalance(p *account.UpdateAccountParams) (*acco
 	if currentBalance < *p.TransactionValue {
 		return nil, errors.New("no enought balance")
 	}
-	newBalance := currentBalance - *p.TransactionValue
+	newBalance := currentBalance + *p.TransactionValue
 	newBalanceStr := strconv.FormatFloat(newBalance, 'f', -1, 64)
 	currentVersionStr := strconv.FormatInt(currentVersion, 10)
 	newVersion := currentVersion + 1
@@ -107,6 +108,25 @@ func (c *AccountRepository) UpdateBalance(p *account.UpdateAccountParams) (*acco
 	if err != nil {
 		fmt.Println("Error parsing time:", err)
 		return nil, err
+	}
+	var queue SendMsgQueue
+	queue.Name = "ledger"
+	queue.MessageBody = "Registro de transação"
+	transactionValueStr := strconv.FormatFloat(*p.TransactionValue, 'f', -1, 64)
+	queue.MessageGroupId = p.Id
+	queue.MessageAttributes = map[string]*sqs.MessageAttributeValue{
+		"id": &sqs.MessageAttributeValue{
+			DataType:    aws.String("String"),
+			StringValue: aws.String(*p.Id),
+		},
+		"value": &sqs.MessageAttributeValue{
+			DataType:    aws.String("Number"),
+			StringValue: aws.String(transactionValueStr),
+		},
+	}
+	error := queue.SendMsgQueue()
+	if error != nil {
+		return nil, error
 	}
 	res := &account.BankAccount{
 		Ledger_bank: *p.Id,
