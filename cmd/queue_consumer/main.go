@@ -55,8 +55,11 @@ func UpdateListTransactions(c *account.UpdateListTransactions) error {
 	}
 	input := &dynamodb.UpdateItemInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":r": {
+			":n": {
 				L: objects,
+			},
+			":empty_list": {
+				L: []*dynamodb.AttributeValue{},
 			},
 		},
 		TableName: aws.String(*c.TableName),
@@ -66,7 +69,7 @@ func UpdateListTransactions(c *account.UpdateListTransactions) error {
 			},
 		},
 		ReturnValues:     aws.String("UPDATED_NEW"),
-		UpdateExpression: aws.String("set transactions = :r"),
+		UpdateExpression: aws.String("set transactions = list_append(if_not_exists(transactions, :empty_list), :n)"),
 	}
 	_, err := utils.DataBaseClient.UpdateItem(input)
 	if err != nil {
