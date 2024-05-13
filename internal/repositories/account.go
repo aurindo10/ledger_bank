@@ -136,6 +136,41 @@ func (c *AccountRepository) UpdateBalance(p *account.UpdateAccountParams) (*acco
 	}
 	return res, nil
 }
+func (p *AccountRepository) UpdateListTransactions(c *account.UpdateListTransactions) error {
+	transactionValueStr := strconv.FormatFloat(*c.Value, 'f', -1, 64)
+	objects := []*dynamodb.AttributeValue{
+		{
+			M: map[string]*dynamodb.AttributeValue{
+				"value": {
+					N: aws.String(transactionValueStr),
+				},
+			},
+		},
+	}
+	input := &dynamodb.UpdateItemInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":n": {
+				L: objects,
+			},
+			":empty_list": {
+				L: []*dynamodb.AttributeValue{},
+			},
+		},
+		TableName: aws.String(*c.TableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"ledger_bank": {
+				S: aws.String(c.Id),
+			},
+		},
+		ReturnValues:     aws.String("UPDATED_NEW"),
+		UpdateExpression: aws.String("set transactions = list_append(if_not_exists(transactions, :empty_list), :n)"),
+	}
+	_, err := p.DataBaseConection.UpdateItem(input)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func NewAccountRepository() *AccountRepository {
 	return &AccountRepository{

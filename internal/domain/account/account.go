@@ -82,4 +82,5 @@ type UpdateListTransactions struct {
 type Repository interface {
 	CreateBankAccount(p *BankAccount) (*BankAccount, error)
 	UpdateBalance(p *UpdateAccountParams) (*BankAccount, error)
+	UpdateListTransactions(c *UpdateListTransactions) error
 }
