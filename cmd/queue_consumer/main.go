@@ -9,5 +9,5 @@ import (
 
 func main() {
 	utils.NewClientDb()
-	lambda.Start(transactionroute.HandleCreateTransaction)
+	lambda.Start(transactionroute.HandlerConsumeSqs)
 }
