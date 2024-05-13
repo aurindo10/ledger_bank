@@ -74,6 +74,11 @@ func (p UpdateAccountParams) Valid() (problems map[string]string) {
 	return problems
 }
 
+type UpdateListTransactions struct {
+	Value     *float64 `json:"value"`
+	TableName *string
+	Id        string
+}
 type Repository interface {
 	CreateBankAccount(p *BankAccount) (*BankAccount, error)
 	UpdateBalance(p *UpdateAccountParams) (*BankAccount, error)
