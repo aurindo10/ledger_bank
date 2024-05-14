@@ -79,8 +79,13 @@ type UpdateListTransactions struct {
 	TableName *string
 	Id        string
 }
+type GetTransactionParams struct {
+	FromDate *string `json:"from_date"`
+	ToDate   *string `json:"to_date"`
+}
 type Repository interface {
 	CreateBankAccount(p *BankAccount) (*BankAccount, error)
 	UpdateBalance(p *UpdateAccountParams) (*BankAccount, error)
 	UpdateListTransactions(c *UpdateListTransactions) error
+	GetTransactions(c *GetTransactionParams) error
 }

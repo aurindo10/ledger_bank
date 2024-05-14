@@ -171,7 +171,7 @@ func (p *AccountRepository) UpdateListTransactions(c *account.UpdateListTransact
 	}
 	return nil
 }
-
+func (p *AccountRepository) GetTransactions(c *account.GetTransactionParams) error
 func NewAccountRepository() *AccountRepository {
 	return &AccountRepository{
 		DataBaseConection: utils.DataBaseClient,
